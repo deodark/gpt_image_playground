@@ -1,10 +1,12 @@
 import type { ApiMode } from '../types'
+import { DEFAULT_STREAM_PARTIAL_IMAGES } from '../types'
 
 import { normalizeBaseUrl } from './devProxy'
 
-function normalizeStreamPartialImages(value: unknown, fallback = 1): number {
+export function normalizeStreamPartialImages(value: unknown, fallback: number | undefined = DEFAULT_STREAM_PARTIAL_IMAGES): number {
+  const fallbackValue = fallback ?? DEFAULT_STREAM_PARTIAL_IMAGES
   const numeric = typeof value === 'number' ? value : Number(value)
-  if (!Number.isFinite(numeric)) return fallback
+  if (!Number.isFinite(numeric)) return fallbackValue
   return Math.min(3, Math.max(0, Math.trunc(numeric)))
 }
 

@@ -16,7 +16,7 @@ import type {
 } from '../types'
 import { DEFAULT_AGENT_MAX_TOOL_ROUNDS, DEFAULT_STREAM_PARTIAL_IMAGES, DEFAULT_ZIP_DOWNLOAD_ROUTES, ZIP_DOWNLOAD_ROUTE_VALUES } from '../types'
 import { shouldUseApiProxy } from './devProxy'
-import { parseDefaultApiUrl } from './defaultApiUrl'
+import { normalizeStreamPartialImages, parseDefaultApiUrl } from './defaultApiUrl'
 import { readRuntimeEnv } from './runtimeEnv'
 import { isImportableConfigUrl } from './customProviderConfigUrl'
 
@@ -68,12 +68,7 @@ function getDefaultStreamImages(provider: ApiProvider, apiMode: ApiMode): boolea
   return provider === 'openai' && apiMode === 'responses'
 }
 
-export function normalizeStreamPartialImages(value: unknown, fallback: number | undefined = DEFAULT_STREAM_PARTIAL_IMAGES): number {
-  const fallbackValue = fallback ?? DEFAULT_STREAM_PARTIAL_IMAGES
-  const numeric = typeof value === 'number' ? value : Number(value)
-  if (!Number.isFinite(numeric)) return fallbackValue
-  return Math.min(3, Math.max(0, Math.trunc(numeric)))
-}
+export { normalizeStreamPartialImages } from './defaultApiUrl'
 
 export function normalizeAgentMaxToolRounds(value: unknown, fallback: number | undefined = DEFAULT_AGENT_MAX_TOOL_ROUNDS): number {
   const fallbackValue = fallback ?? DEFAULT_AGENT_MAX_TOOL_ROUNDS
@@ -858,7 +853,7 @@ export const DEFAULT_SETTINGS: AppSettings = normalizeSettings({
   apiMode: DEFAULT_API_URL_PATCH?.apiMode ?? 'images',
   codexCli: DEFAULT_API_URL_PATCH?.codexCli ?? false,
   apiProxy: DEFAULT_OPENAI_API_PROXY,
-  streamImages: DEFAULT_API_URL_PATCH?.streamImages ?? false,
+  streamImages: DEFAULT_API_URL_PATCH?.streamImages ?? getDefaultStreamImages('openai', DEFAULT_API_URL_PATCH?.apiMode ?? 'images'),
   streamPartialImages: DEFAULT_API_URL_PATCH?.streamPartialImages ?? DEFAULT_STREAM_PARTIAL_IMAGES,
   customProviders: [],
   clearInputAfterSubmit: false,
